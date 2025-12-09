@@ -22,22 +22,22 @@ This document provides a complete specification of the data model for the Zava D
 ### Database Information
 - **Database Name**: `zava`
 - **Total Collections**: 9 (8 synced to Ditto, 1 MongoDB-only)
-- **Total Documents**: ~453,000
-- **Storage Size**: ~243 MB (MongoDB), ~236 MB (Ditto without embeddings)
+- **Total Documents**: ~329,000
+- **Storage Size**: ~125 MB (MongoDB), ~120 MB (Ditto without embeddings)
 
 ### Collection Summary
 
 | Collection | Documents | Avg Size | Synced to Ditto |
 |------------|-----------|----------|-----------------|
 | stores | 8 | 500 B | ✅ Yes |
-| customers | 50,000 | 300 B | ✅ Yes |
+| customers | 25,000 | 300 B | ✅ Yes |
 | categories | 9 | 400 B | ✅ Yes |
 | product_types | ~30 | 200 B | ✅ Yes |
 | products | 400 | 1-2 KB | ✅ Yes |
 | **product_embeddings** | 400 | 16-20 KB | ❌ **No** |
 | inventory | ~3,000 | 200 B | ✅ Yes |
-| orders | 200,000 | 500 B | ✅ Yes |
-| order_items | 200,000-500,000 | 300 B | ✅ Yes |
+| orders | 100,000 | 500 B | ✅ Yes |
+| order_items | ~200,000 | 300 B | ✅ Yes |
 
 ---
 
@@ -183,7 +183,7 @@ This document provides a complete specification of the data model for the Zava D
 **Foreign Keys**:
 - `primary_store_id` → `stores.store_id`
 
-**Document Count**: ~50,000 customers
+**Document Count**: ~25,000 customers
 
 ---
 
@@ -544,7 +544,7 @@ This document provides a complete specification of the data model for the Zava D
 - `customer_id` → `customers.customer_id`
 - `store_id` → `stores.store_id`
 
-**Document Count**: ~200,000 orders
+**Document Count**: ~100,000 orders
 
 ---
 
@@ -611,7 +611,7 @@ This document provides a complete specification of the data model for the Zava D
 - `order_id` → `orders.order_id`
 - `product_id` → `products.product_id`
 
-**Document Count**: ~200,000 to 500,000 line items
+**Document Count**: ~200,000 line items
 
 ---
 
@@ -707,14 +707,14 @@ erDiagram
 
 **Collection Sizes**:
 - stores: 8 documents
-- customers: 50,000 documents
+- customers: 25,000 documents
 - categories: 9 documents
 - product_types: ~30 documents
 - products: 400 documents
 - product_embeddings: 400 documents (MongoDB only, not synced to Ditto)
 - inventory: ~3,000 documents (UUID-based with location tracking)
-- orders: 200,000 documents
-- order_items: 200,000-500,000 documents
+- orders: 100,000 documents
+- order_items: ~200,000 documents
 
 ### Foreign Key Constraints
 

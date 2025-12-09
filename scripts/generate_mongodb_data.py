@@ -6,7 +6,7 @@ Converts PostgreSQL data model to MongoDB + Ditto compatible format
 This script:
 1. Transforms reference data (categories with MAPs, stores)
 2. Transforms product data (separates embeddings)
-3. Generates customers (50,000)
+3. Generates customers (25,000)
 4. Generates inventory with location tracking (UUID-based)
 5. Generates orders and order_items with seasonal patterns
 
@@ -52,13 +52,13 @@ MONGODB_CONNECTION_STRING = os.getenv('MONGODB_CONNECTION_STRING')
 MONGODB_DATABASE = os.getenv('MONGODB_DATABASE', 'retail-demo')
 
 # Data generation settings
-NUM_CUSTOMERS = int(os.getenv('NUM_CUSTOMERS', '50000'))
-NUM_ORDERS = int(os.getenv('NUM_ORDERS', '200000'))
-START_DATE = datetime.strptime(os.getenv('START_DATE', '2020-01-01'), '%Y-%m-%d')
-END_DATE = datetime.strptime(os.getenv('END_DATE', '2026-12-31'), '%Y-%m-%d')
+NUM_CUSTOMERS = int(os.getenv('NUM_CUSTOMERS', '25000'))
+NUM_ORDERS = int(os.getenv('NUM_ORDERS', '100000'))
+START_DATE = datetime.strptime(os.getenv('START_DATE', '2022-12-09'), '%Y-%m-%d')
+END_DATE = datetime.strptime(os.getenv('END_DATE', '2025-12-09'), '%Y-%m-%d')
 
 # Paths to original data files
-DATA_DIR = Path(__file__).parent.parent.parent / 'data' / 'database'
+DATA_DIR = Path(__file__).parent.parent / 'original' / 'data' / 'database'
 REFERENCE_DATA_PATH = DATA_DIR / 'reference_data.json'
 PRODUCT_DATA_PATH = DATA_DIR / 'product_data.json'
 
@@ -387,8 +387,8 @@ class MongoDBDataGenerator:
             # Year growth multiplier
             year_multiplier = year_weights.get(year, 1.0)
 
-            # Select 1-5 products for this order
-            num_items = random.choices([1, 2, 3, 4, 5], weights=[30, 35, 20, 10, 5], k=1)[0]
+            # Select 1-3 products for this order (average 2 items/order for ~200k total items)
+            num_items = random.randint(1, 3)
             selected_products = random.sample(product_list, k=num_items)
 
             # Calculate order totals
@@ -511,9 +511,9 @@ class MongoDBDataGenerator:
         logger.info(f"  • Products: 424")
         logger.info(f"  • Product Embeddings: 424 (not synced to Ditto)")
         logger.info(f"  • Customers: {NUM_CUSTOMERS:,}")
-        logger.info(f"  • Inventory: ~3,000 records")
+        logger.info(f"  • Inventory: ~3,168 records")
         logger.info(f"  • Orders: {NUM_ORDERS:,}")
-        logger.info(f"  • Order Items: ~{NUM_ORDERS * 2:,}")
+        logger.info(f"  • Order Items: ~{NUM_ORDERS * 2:,} (average 2 items/order)")
         logger.info("="*60 + "\n")
 
         return True

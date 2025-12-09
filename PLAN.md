@@ -98,14 +98,14 @@ Document the complete MongoDB + Ditto data model including:
 
 **Collections to document**:
 - stores (8 documents)
-- customers (50,000 documents)
+- customers (25,000 documents)
 - categories (9 documents)
 - product_types (~30 documents)
 - products (400 documents)
 - product_embeddings (400 documents, MongoDB only - not synced to Ditto)
 - inventory (3,000 documents with composite ID)
-- orders (200,000 documents)
-- order_items (200,000-500,000 documents with UUID)
+- orders (100,000 documents)
+- order_items (~200,000 documents with UUID)
 
 ### Step 1.2: Architecture Documentation
 **File**: `docs/ARCHITECTURE.md` ✅
@@ -196,10 +196,10 @@ AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-small
 AZURE_OPENAI_API_VERSION=2024-02-01
 
 # Data Generation Settings
-NUM_CUSTOMERS=50000
-NUM_ORDERS=200000
-START_DATE=2020-01-01
-END_DATE=2026-12-31
+NUM_CUSTOMERS=25000
+NUM_ORDERS=100000
+START_DATE=2022-12-09
+END_DATE=2025-12-09
 
 # Optional: Local MongoDB (for testing)
 MONGODB_LOCAL_CONNECTION_STRING=mongodb://localhost:27017/
@@ -229,11 +229,11 @@ Python script to generate complete dataset for MongoDB:
 - [x] **Load MongoDB credentials from .env file** (MONGODB_CONNECTION_STRING, MONGODB_DATABASE)
 - [x] Load reference data from original/data/database/ (stores, categories, product types)
 - [x] Load product data from JSON (with transformations)
-- [x] Generate customers (50,000) with Faker
+- [x] Generate customers (25,000) with Faker
 - [x] Generate products (400) with proper structure
 - [x] Generate inventory (store × product matrix, ~3,000 records, UUID-based)
-- [x] Generate orders (200,000) with seasonal patterns
-- [x] Generate order_items (separate collection, UUID-based)
+- [x] Generate orders (100,000) with seasonal patterns
+- [x] Generate order_items (~200,000, separate collection, UUID-based)
 - [x] Handle embeddings in separate collection
 - [x] Add soft delete flags to all documents
 - [x] Duplicate ID fields for Ditto connector
@@ -441,14 +441,14 @@ Test data generation logic:
 
 **Collection Count Validation**:
 - [ ] Test stores collection has exactly 8 documents
-- [ ] Test customers collection has ~50,000 documents
+- [ ] Test customers collection has ~25,000 documents
 - [ ] Test categories collection has exactly 9 documents
 - [ ] Test product_types collection has ~30 documents
 - [ ] Test products collection has exactly 400 documents
 - [ ] Test product_embeddings collection has exactly 400 documents
 - [ ] Test inventory collection has ~3,000 documents
-- [ ] Test orders collection has ~200,000 documents
-- [ ] Test order_items collection has 200,000-500,000 documents
+- [ ] Test orders collection has ~100,000 documents
+- [ ] Test order_items collection has ~200,000 documents
 
 **Document Structure Validation**:
 - [ ] Test all stores have required fields (store_id, store_name, is_online, location, deleted)

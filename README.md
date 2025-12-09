@@ -71,7 +71,7 @@ python scripts/encode_password.py
 # Test connection
 python scripts/test_connection.py
 
-# Generate all data (~10 minutes for 200k orders)
+# Generate all data (~5 minutes for 100k orders)
 python scripts/generate_mongodb_data.py
 ```
 
@@ -79,10 +79,10 @@ This creates:
 - ✅ 8 stores
 - ✅ 9 categories
 - ✅ 424 products + embeddings
-- ✅ 50,000 customers
+- ✅ 25,000 customers
 - ✅ 3,168 inventory records
-- ✅ 200,000 orders
-- ✅ ~450,000 order items
+- ✅ 100,000 orders
+- ✅ ~200,000 order items
 
 ### 4. Create Indexes
 
@@ -122,37 +122,39 @@ python scripts/trigger_initial_sync.py
 ## Project Structure
 
 ```
-ai-tour-26-zava-diy-dataset-plus-mcp/
-├── README.md                    # This file
-├── CONNECTOR_SETUP.md           # Ditto connector deployment guide
-├── SAMPLE_QUERIES.md            # MongoDB and Ditto query examples
-├── SCRIPTS_REFERENCE.md         # Detailed scripts documentation
-├── CLAUDE.md                    # Research and design decisions
-├── .env                         # Environment variables (gitignored)
-├── .env.sample                  # Environment template
-├── requirements.txt             # Python dependencies
+/retail-demo-zava-dyi-dataset
+├── README.md                          # This file - project overview
+├── QUICKSTART.md                      # Quick start guide
+├── PLAN.md                            # Implementation plan & phases
+├── STATUS.md                          # Current project status
+├── CONNECTOR_SETUP.md                 # Ditto connector setup guide
+├── SAMPLE_QUERIES.md                  # MongoDB and Ditto query examples
+├── SCRIPTS_REFERENCE.md               # Scripts documentation & workflows
+├── Claude.md                          # Research & design decisions
+├── LICENSE                            # Project license
+├── .env                               # Environment variables (gitignored)
+├── .env.sample                        # Environment template
+├── .gitignore                         # Git ignore rules
+├── requirements.txt                   # Python dependencies
 │
-├── config/
-│   └── ditto-connector.yaml     # Ditto connector configuration
+├── scripts/                           # Data generation & utility scripts
+│   ├── check_credentials.py           # Validate .env file
+│   ├── clear_mongodb_data.py          # Clear all collections and data
+│   ├── create_indexes.py              # Create MongoDB indexes
+│   ├── create_indexes.js              # Create indexes (MongoDB shell)
+│   ├── drop_indexes.py                # Drop all indexes
+│   ├── enable_change_streams.py       # Enable MongoDB change streams
+│   └── encode_password.py             # URL-encode passwords
+│   ├── generate_mongodb_data.py       # Main data generation (542 lines)
+│   ├── test_change_streams.py         # Verify change streams working
+│   ├── test_connection.py             # Test MongoDB connection
+│   ├── trigger_initial_sync.py        # Trigger initial Ditto sync
 │
-├── scripts/
-│   ├── generate_mongodb_data.py           # Main data generation script
-│   ├── clear_mongodb_data.py              # Clear all data (for testing)
-│   ├── create_indexes.py                  # Create MongoDB indexes
-│   ├── drop_indexes.py                    # Drop indexes (schema changes)
-│   ├── enable_change_streams.py           # Enable change streams
-│   ├── test_change_streams.py             # Verify change streams
-│   ├── trigger_initial_sync.py            # Trigger initial Ditto sync
-│   ├── test_connection.py                 # Test MongoDB connection
-│   ├── check_credentials.py               # Validate credentials
-│   └── encode_password.py                 # URL-encode passwords
-│
-├── original/                    # Original PostgreSQL project files
-│   ├── data/                    # Original product/reference data
-│   ├── scripts/                 # Original PostgreSQL scripts
-│   └── ...                      # Other original files
-│
-└── docs/                        # Additional documentation
+└── docs/                              # Technical documentation
+    ├── ARCHITECTURE.md                # System architecture & data flow
+    ├── DATA_MODEL.md                  # Complete schema specs (9 collections)
+    └── INVENTORY_TRACKING_UPDATE.md   # Inventory model change log
+    ├── MIGRATION_GUIDE.md             # PostgreSQL → MongoDB conversion
 ```
 
 ---
@@ -164,13 +166,13 @@ ai-tour-26-zava-diy-dataset-plus-mcp/
 | Collection | Documents | Sync to Ditto | Description |
 |-----------|-----------|---------------|-------------|
 | `stores` | 8 | ✅ | Physical locations + online store |
-| `customers` | 50,000 | ✅ | Customer demographics and contact info |
+| `customers` | 25,000 | ✅ | Customer demographics and contact info |
 | `categories` | 9 | ✅ | Product categories with seasonal multipliers |
 | `products` | 424 | ✅ | Product catalog (SKU, pricing, descriptions) |
 | `product_embeddings` | 424 | ❌ | AI embeddings (too large for mobile) |
 | `inventory` | 3,168 | ✅ | Store-specific stock levels with locations |
-| `orders` | 200,000 | ✅ | Order headers |
-| `order_items` | ~450,000 | ✅ | Order line items |
+| `orders` | 100,000 | ✅ | Order headers |
+| `order_items` | ~200,000 | ✅ | Order line items |
 
 ### Key Design Patterns
 
@@ -415,12 +417,12 @@ See [CONNECTOR_SETUP.md](./CONNECTOR_SETUP.md) for detailed configuration instru
 
 ### MongoDB Atlas
 - **Cluster**: M10+ recommended (production)
-- **Storage**: ~250 MB for full dataset
+- **Storage**: ~125 MB for full dataset
 - **Indexes**: 44 indexes across 8 collections
 - **Vector Search**: Requires Atlas Search enabled
 
 ### Ditto Sync
-- **Initial Sync**: ~5-10 minutes for 200k orders
+- **Initial Sync**: ~3-5 minutes for 100k orders
 - **Real-time Sync**: <100ms latency for incremental changes
 - **Mobile Storage**: ~10-50 MB per device (with subscriptions)
 - **Offline Support**: Unlimited offline duration

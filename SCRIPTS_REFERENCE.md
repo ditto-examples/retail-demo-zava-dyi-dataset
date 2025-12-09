@@ -77,12 +77,12 @@ Validation Checks:
 
 **Usage**:
 ```bash
-# Generate with defaults (50k customers, 200k orders)
+# Generate with defaults (25k customers, 100k orders)
 python scripts/generate_mongodb_data.py
 
 # Or customize via .env
-NUM_CUSTOMERS=100000
-NUM_ORDERS=500000
+NUM_CUSTOMERS=50000
+NUM_ORDERS=200000
 python scripts/generate_mongodb_data.py
 ```
 
@@ -91,12 +91,12 @@ python scripts/generate_mongodb_data.py
 - 9 categories with seasonal multipliers
 - 424 products with descriptions
 - 424 product embeddings (separate collection)
-- 50,000 customers (configurable)
+- 25,000 customers (configurable)
 - 3,168 inventory records
-- 200,000 orders (configurable)
-- ~450,000 order items
+- 100,000 orders (configurable)
+- ~200,000 order items
 
-**Duration**: ~10 minutes for default dataset
+**Duration**: ~5 minutes for default dataset
 
 **Features**:
 - Realistic seasonal patterns
@@ -323,9 +323,9 @@ Testing 'retail-demo' database...
 ✓ Found 9 collections in 'retail-demo':
   • categories: 9 documents
   • stores: 8 documents
-  • orders: 200,000 documents
-  • order_items: 450,080 documents
-  • customers: 50,000 documents
+  • orders: 100,000 documents
+  • order_items: 199,904 documents
+  • customers: 25,000 documents
   • products: 424 documents
   • product_embeddings: 424 documents
   • inventory: 3,168 documents
@@ -476,10 +476,10 @@ DITTO_API_KEY=your_api_key
 DITTO_CLOUD_ENDPOINT=https://cloud.ditto.live
 
 # Data Generation (optional)
-NUM_CUSTOMERS=50000
-NUM_ORDERS=200000
-START_DATE=2022-01-01
-END_DATE=2025-12-31
+NUM_CUSTOMERS=25000
+NUM_ORDERS=100000
+START_DATE=2022-12-09
+END_DATE=2025-12-09
 ```
 
 ---

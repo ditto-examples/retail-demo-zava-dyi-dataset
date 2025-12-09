@@ -53,7 +53,7 @@
 
 | Script | Size | Purpose | Status |
 |--------|------|---------|--------|
-| `scripts/generate_mongodb_data.py` | **542 lines** | Generate all 9 collections (~450K docs) | ✅ Ready |
+| `scripts/generate_mongodb_data.py` | **542 lines** | Generate all 9 collections (~329K docs) | ✅ Ready |
 
 **Features**:
 - ✅ Async/await with Motor driver (high performance)
@@ -146,14 +146,14 @@ All documentation has been created and updated with the latest design decisions:
 | Collection | Documents | Synced | ID Mapping | Key Features |
 |------------|-----------|--------|------------|--------------|
 | stores | 8 | ✅ | single_field (store_id) | Location MAP |
-| customers | 50,000 | ✅ | single_field (customer_id) | Faker-generated |
+| customers | 25,000 | ✅ | single_field (customer_id) | Faker-generated |
 | categories | 9 | ✅ | match_ids | Seasonal multipliers MAP |
 | product_types | ~30 | ✅ | match_ids | Sub-categories |
 | products | 400 | ✅ | single_field (product_id) | Specifications MAP |
 | **product_embeddings** | 400 | ❌ | N/A | **MongoDB only** (too large) |
 | **inventory** | ~3,000 | ✅ | **match_ids (UUID)** | **Location tracking** |
-| orders | 200,000 | ✅ | single_field (order_id) | Denormalized fields |
-| **order_items** | 200K-500K | ✅ | **match_ids (UUID)** | Separate collection |
+| orders | 100,000 | ✅ | single_field (order_id) | Denormalized fields |
+| **order_items** | ~200K | ✅ | **match_ids (UUID)** | Separate collection |
 
 ### Key Design Patterns
 
