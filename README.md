@@ -229,7 +229,7 @@ ai-tour-26-zava-diy-dataset-plus-mcp/
 ```mermaid
 %%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#4a90e2','primaryTextColor':'#fff','primaryBorderColor':'#2c5282','lineColor':'#4a90e2','secondaryColor':'#7c3aed','tertiaryColor':'#059669'}}}%%
 graph TB
-    subgraph flutter["📱 Flutter Applications - Cross-platform"]
+    subgraph flutter["📱 Flutter Apps"]
         ios["iOS"]
         ipados["iPadOS"]
         android["Android"]
@@ -238,17 +238,17 @@ graph TB
         linux["Linux"]
     end
 
-    subgraph ditto_sync["🔄 Ditto Sync Layer"]
-        sync["Ditto Sync<br/>(CRDTs, P2P, Offline-First)"]
+    subgraph ditto_sync["🔄 Ditto Sync"]
+        sync["CRDT Sync<br/>P2P & Offline-First"]
     end
 
-    portal["☁️ Ditto Cloud<br/>(Portal)"]
+    portal["☁️ Ditto Cloud"]
 
-    connector["🔌 MongoDB Connector<br/>(Managed in Portal)<br/>Bidirectional Sync"]
+    connector["🔌 MongoDB Connector<br/>Bidirectional Sync"]
 
     subgraph mongodb["🗄️ MongoDB Atlas"]
-        db["retail-demo database<br/>━━━━━━━━━━━━━━━━<br/>• stores<br/>• customers<br/>• products<br/>• inventory<br/>• orders<br/>• order_items"]
-        vector["Vector Search<br/>(embeddings)"]
+        db["retail-demo<br/>━━━━━━━━<br/>stores | customers<br/>products | inventory<br/>orders | order_items"]
+        vector["Vector Search"]
     end
 
     ios & ipados & android & macos & windows & linux --> sync
