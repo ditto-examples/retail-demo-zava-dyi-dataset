@@ -115,9 +115,9 @@ def main():
     if error_count == 0:
         print(f"{GREEN}Initial sync triggered successfully!{RESET}")
         print(f"\n{BLUE}Next steps:{RESET}")
-        print("  1. Monitor connector logs: docker-compose logs -f ditto-connector")
-        print("  2. Check sync progress in Ditto Cloud Portal")
-        print("  3. Verify data in Ditto: python scripts/verify_ditto_sync.py")
+        print("  1. Monitor sync progress in Ditto Portal: https://portal.ditto.live")
+        print("  2. Check connector logs in Portal (Settings → MongoDB Connector)")
+        print("  3. Verify document counts match between MongoDB and Ditto")
     else:
         print(f"{RED}Some collections failed. Check errors above.{RESET}")
         sys.exit(1)

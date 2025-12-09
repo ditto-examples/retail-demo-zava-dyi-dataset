@@ -619,30 +619,101 @@ This document provides a complete specification of the data model for the Zava D
 
 ### Entity Relationship Diagram
 
+```mermaid
+erDiagram
+    STORES ||--o{ CUSTOMERS : "primary_store"
+    STORES ||--o{ ORDERS : "store"
+    STORES ||--o{ INVENTORY : "store"
+
+    CATEGORIES ||--o{ PRODUCT_TYPES : "category"
+    CATEGORIES ||--o{ PRODUCTS : "category"
+
+    PRODUCT_TYPES ||--o{ PRODUCTS : "type"
+
+    PRODUCTS ||--o{ ORDER_ITEMS : "product"
+    PRODUCTS ||--o{ INVENTORY : "product"
+    PRODUCTS ||--|| PRODUCT_EMBEDDINGS : "embeddings"
+
+    CUSTOMERS ||--o{ ORDERS : "customer"
+
+    ORDERS ||--o{ ORDER_ITEMS : "order"
+
+    STORES {
+        string store_id PK
+        string store_name
+        boolean is_online
+        map location
+    }
+
+    CUSTOMERS {
+        string customer_id PK
+        string first_name
+        string last_name
+        string email
+        string primary_store_id FK
+    }
+
+    CATEGORIES {
+        string category_id PK
+        string category_name
+        map seasonal_multipliers
+    }
+
+    PRODUCT_TYPES {
+        string type_id PK
+        string type_name
+        string category_id FK
+    }
+
+    PRODUCTS {
+        string product_id PK
+        string sku
+        string product_name
+        string category_id FK
+        string type_id FK
+        decimal base_price
+    }
+
+    PRODUCT_EMBEDDINGS {
+        string product_id PK
+        array image_embedding
+        array description_embedding
+    }
+
+    INVENTORY {
+        uuid _id PK
+        string store_id FK
+        string product_id FK
+        int stock_level
+        map location
+    }
+
+    ORDERS {
+        string order_id PK
+        string customer_id FK
+        string store_id FK
+        datetime order_date
+    }
+
+    ORDER_ITEMS {
+        uuid _id PK
+        string order_id FK
+        string product_id FK
+        int quantity
+        decimal unit_price
+    }
 ```
-stores (8)
-  ├─< customers (50K) [primary_store_id]
-  ├─< orders (200K) [store_id]
-  └─< inventory (3K) [store_id] (UUID-based)
 
-categories (9)
-  ├─< product_types (30) [category_id]
-  └─< products (400) [category_id]
-
-product_types (30)
-  └─< products (400) [type_id]
-
-products (400)
-  ├─< order_items (200K-500K) [product_id]
-  ├─< inventory (3K) [product_id] (UUID-based with location)
-  └── product_embeddings (400) [product_id] (1:1, MongoDB only)
-
-customers (50K)
-  └─< orders (200K) [customer_id]
-
-orders (200K)
-  └─< order_items (200K-500K) [order_id]
-```
+**Collection Sizes**:
+- stores: 8 documents
+- customers: 50,000 documents
+- categories: 9 documents
+- product_types: ~30 documents
+- products: 400 documents
+- product_embeddings: 400 documents (MongoDB only, not synced to Ditto)
+- inventory: ~3,000 documents (UUID-based with location tracking)
+- orders: 200,000 documents
+- order_items: 200,000-500,000 documents
 
 ### Foreign Key Constraints
 

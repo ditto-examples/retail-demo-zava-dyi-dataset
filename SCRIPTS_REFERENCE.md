@@ -429,8 +429,9 @@ python scripts/enable_change_streams.py
 # 3. Trigger initial sync
 python scripts/trigger_initial_sync.py
 
-# 4. Monitor connector logs
-docker-compose logs -f ditto-connector
+# 4. Monitor connector in Ditto Portal
+# Navigate to https://portal.ditto.live → Settings → MongoDB Connector
+# View sync status, logs, and metrics
 ```
 
 ### Schema Migration (Data Model Changes)

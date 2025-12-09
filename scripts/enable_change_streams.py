@@ -92,7 +92,7 @@ def main():
         print(f"{GREEN}All change streams enabled successfully!{RESET}")
         print(f"\n{BLUE}Next steps:{RESET}")
         print("  1. Verify with: python scripts/test_change_streams.py")
-        print("  2. Deploy Ditto connector: docker-compose up -d")
+        print("  2. Configure connector in Ditto Portal: https://portal.ditto.live")
         print("  3. Run initial sync: python scripts/trigger_initial_sync.py")
     else:
         print(f"{RED}Some collections failed. Check errors above.{RESET}\n")

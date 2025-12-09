@@ -39,7 +39,7 @@ This document describes the complete system architecture for the MongoDB + Ditto
 
 **Edge (Mobile/Client)**:
 - Ditto SDK (local database + sync)
-- Flutter/JavaScript (client apps)
+- Flutter (cross-platform apps: iOS, iPadOS, Android, MacOS, Windows, Linux)
 - Ditto Query Language (DQL)
 
 **Integration**:
@@ -51,75 +51,60 @@ This document describes the complete system architecture for the MongoDB + Ditto
 
 ## Architecture Diagram
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         Cloud Layer                              │
-│                                                                  │
-│  ┌──────────────┐         ┌──────────────┐                     │
-│  │   MongoDB    │◄────────┤    Ditto     │                     │
-│  │    Atlas     │  Change │  MongoDB     │                     │
-│  │              │  Streams│  Connector   │                     │
-│  │  - 9 Collections       │              │                     │
-│  │  - Indexes            │  - ID Mapping │                     │
-│  │  - Vector Search      │  - CRDTs      │                     │
-│  └──────┬───────┘         └──────┬───────┘                     │
-│         │                        │                               │
-│         │                        │                               │
-│    ┌────▼─────┐            ┌────▼─────┐                        │
-│    │  Python  │            │  Ditto   │                        │
-│    │   Data   │            │  Cloud   │                        │
-│    │Generator │            │  Portal  │                        │
-│    └──────────┘            └──┬───┬───┘                        │
-│                               │   │                              │
-└───────────────────────────────┼───┼──────────────────────────────┘
-                                │   │
-                    ┌───────────┘   └───────────┐
-                    │                           │
-         ┌──────────▼──────────┐     ┌──────────▼──────────┐
-         │   Sync Protocol     │     │   Sync Protocol     │
-         │  (CRDT Delta Sync)  │     │  (CRDT Delta Sync)  │
-         └──────────┬──────────┘     └──────────┬──────────┘
-                    │                           │
-┌───────────────────┼───────────────────────────┼──────────────────┐
-│                   │     Edge Layer            │                   │
-│                   │                           │                   │
-│    ┌──────────────▼───────┐    ┌─────────────▼──────────┐       │
-│    │  Mobile POS Device   │    │  Sales Rep Tablet      │       │
-│    │                      │    │                         │       │
-│    │  ┌────────────────┐  │    │  ┌────────────────┐    │       │
-│    │  │  Ditto Store   │  │    │  │  Ditto Store   │    │       │
-│    │  │  (Local DB)    │  │    │  │  (Local DB)    │    │       │
-│    │  │                │  │    │  │                │    │       │
-│    │  │ - orders       │  │    │  │ - customers    │    │       │
-│    │  │ - order_items  │  │    │  │ - products     │    │       │
-│    │  │ - inventory    │  │    │  │ - orders       │    │       │
-│    │  │ - products     │  │    │  └────────────────┘    │       │
-│    │  └────────────────┘  │    │                         │       │
-│    │                      │    │  Subscriptions:         │       │
-│    │  Subscriptions:      │    │  - All products         │       │
-│    │  - store_id='seattle'│    │  - Customer assigned   │       │
-│    └──────────────────────┘    └─────────────────────────┘       │
-│                                                                   │
-│    ┌──────────────────────────────────────────────────────┐     │
-│    │           Peer-to-Peer Sync (Optional)               │     │
-│    │  Devices can sync directly via WiFi/Bluetooth        │     │
-│    └──────────────────────────────────────────────────────┘     │
-│                                                                   │
-└───────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph cloud["☁️ Cloud Layer"]
+        mongodb["MongoDB Atlas<br/>━━━━━━━━━━<br/>• 9 Collections<br/>• Indexes<br/>• Vector Search"]
+        connector["Ditto MongoDB Connector<br/>━━━━━━━━━━<br/>• ID Mapping<br/>• CRDTs"]
+        datagen["Python Data<br/>Generator"]
+        portal["Ditto Cloud<br/>Portal"]
 
-┌─────────────────────────────────────────────────────────────────┐
-│                      Integration Layer                           │
-│                                                                  │
-│    ┌──────────────┐         ┌──────────────┐                   │
-│    │     MCP      │         │    Azure     │                   │
-│    │   Servers    │         │   OpenAI     │                   │
-│    │              │         │              │                   │
-│    │ - Customer   │         │ - Embeddings │                   │
-│    │   Sales      │         │ - text-embed │                   │
-│    │ - Sales      │         │   -3-small   │                   │
-│    │   Analysis   │         │              │                   │
-│    └──────────────┘         └──────────────┘                   │
-└───────────────────────────────────────────────────────────────────┘
+        mongodb -->|Change Streams| connector
+        mongodb --> datagen
+        connector --> portal
+    end
+
+    subgraph sync["🔄 Sync Protocol Layer"]
+        sync1["CRDT Delta Sync"]
+        sync2["CRDT Delta Sync"]
+    end
+
+    subgraph edge["📱 Edge Layer"]
+        subgraph pos["Mobile POS Device"]
+            pos_store["Ditto Store (Local DB)<br/>━━━━━━━━━━<br/>• orders<br/>• order_items<br/>• inventory<br/>• products"]
+            pos_sub["Subscriptions:<br/>store_id='seattle'"]
+        end
+
+        subgraph tablet["Sales Rep Tablet"]
+            tablet_store["Ditto Store (Local DB)<br/>━━━━━━━━━━<br/>• customers<br/>• products<br/>• orders"]
+            tablet_sub["Subscriptions:<br/>• All products<br/>• Customer assigned"]
+        end
+
+        p2p["🔗 Peer-to-Peer Sync (Optional)<br/>Devices sync via WiFi/Bluetooth"]
+    end
+
+    subgraph integration["🔌 Integration Layer"]
+        mcp["MCP Servers<br/>━━━━━━━━━━<br/>• Customer Sales<br/>• Sales Analysis"]
+        azure["Azure OpenAI<br/>━━━━━━━━━━<br/>• Embeddings<br/>• text-embed-3-small"]
+    end
+
+    portal --> sync1
+    portal --> sync2
+    sync1 --> pos_store
+    sync2 --> tablet_store
+    pos_store -.-> p2p
+    tablet_store -.-> p2p
+
+    mongodb -.-> mcp
+    mongodb -.-> azure
+
+    style cloud fill:#e3f2fd
+    style sync fill:#fff3e0
+    style edge fill:#f3e5f5
+    style integration fill:#e8f5e9
+    style mongodb fill:#bbdefb
+    style connector fill:#c5e1a5
+    style portal fill:#ce93d8
 ```
 
 ---
@@ -218,93 +203,106 @@ This document describes the complete system architecture for the MongoDB + Ditto
 
 ### Write Flow: Mobile → Cloud
 
-```
-1. Mobile Device
-   └─> Ditto Store (local write)
-       └─> CRDT operation recorded
+```mermaid
+sequenceDiagram
+    participant Mobile as 📱 Mobile Device
+    participant SDK as Ditto SDK
+    participant Cloud as ☁️ Ditto Cloud
+    participant Connector as MongoDB Connector
+    participant Atlas as MongoDB Atlas
 
-2. Ditto SDK
-   └─> Sync protocol (delta transmission)
-       └─> Ditto Cloud
-
-3. Ditto Cloud
-   └─> Merge CRDTs from multiple peers
-       └─> Ditto MongoDB Connector
-
-4. MongoDB Connector
-   └─> Convert CRDT → MongoDB document
-       └─> MongoDB Atlas (write via driver)
-
-5. MongoDB Atlas
-   └─> Document updated
-       └─> Change Stream event emitted
+    Mobile->>Mobile: Local write to Ditto Store
+    Note over Mobile: CRDT operation recorded
+    Mobile->>SDK: Sync protocol
+    SDK->>Cloud: Delta transmission
+    Cloud->>Cloud: Merge CRDTs from peers
+    Cloud->>Connector: Send merged data
+    Connector->>Connector: Convert CRDT → MongoDB doc
+    Connector->>Atlas: Write via driver
+    Atlas->>Atlas: Document updated
+    Note over Atlas: Change Stream event emitted
 ```
 
 ### Read Flow: Cloud → Mobile
 
-```
-1. MongoDB Atlas
-   └─> Document changed (via app, connector, or manual edit)
-       └─> Change Stream event
+```mermaid
+sequenceDiagram
+    participant Atlas as MongoDB Atlas
+    participant Connector as MongoDB Connector
+    participant Cloud as ☁️ Ditto Cloud
+    participant SDK as Ditto SDK
+    participant Mobile as 📱 Mobile Device
 
-2. Ditto MongoDB Connector
-   └─> Detect change event
-       └─> Convert to CRDT operation
-
-3. Ditto Cloud
-   └─> Distribute to subscribed peers
-       └─> Sync protocol (delta transmission)
-
-4. Mobile Device
-   └─> Receive CRDT delta
-       └─> Merge into Ditto Store (local)
-       └─> UI updates automatically (reactive queries)
+    Atlas->>Atlas: Document changed
+    Note over Atlas: Change Stream event
+    Atlas->>Connector: Notify change
+    Connector->>Connector: Convert to CRDT operation
+    Connector->>Cloud: Send CRDT delta
+    Cloud->>Cloud: Distribute to subscribed peers
+    Cloud->>SDK: Sync protocol
+    SDK->>Mobile: Delta transmission
+    Mobile->>Mobile: Merge into Ditto Store
+    Note over Mobile: UI updates automatically (reactive)
 ```
 
 ### Query Flow: Mobile Device
 
 **Offline** (no connectivity):
-```
-App Query
- └─> Ditto Store (local query)
-     └─> Return local data
-         └─> UI renders
+
+```mermaid
+sequenceDiagram
+    participant App as Flutter App
+    participant Store as Ditto Store (Local)
+    participant UI as UI Layer
+
+    App->>Store: Query data
+    Store->>Store: Local query execution
+    Store->>App: Return local data
+    App->>UI: Render UI
 ```
 
 **Online** (with connectivity):
-```
-App Query
- └─> Ditto Store (local query, immediate response)
-     └─> Return local data
-         └─> UI renders
 
-Background Sync (parallel)
- └─> Ditto Cloud
-     └─> Fetch updates
-         └─> Merge into local store
-             └─> UI auto-updates if data changed
+```mermaid
+sequenceDiagram
+    participant App as Flutter App
+    participant Store as Ditto Store (Local)
+    participant UI as UI Layer
+    participant Cloud as ☁️ Ditto Cloud
+
+    App->>Store: Query data
+    Store->>Store: Local query (immediate)
+    Store->>App: Return local data
+    App->>UI: Render UI
+
+    par Background Sync
+        Store->>Cloud: Fetch updates
+        Cloud->>Store: Send deltas
+        Store->>Store: Merge into local store
+        Store->>UI: Auto-update UI (if changed)
+    end
 ```
 
 ### Peer-to-Peer Sync (Optional)
 
-```
-Device A (offline)         Device B (offline)
-    │                           │
-    └─────> WiFi/Bluetooth <────┘
-                  │
-                  ▼
-          CRDT Delta Exchange
-                  │
-         ┌────────┴────────┐
-         ▼                 ▼
-    Device A          Device B
-    (updated)         (updated)
-         │                 │
-         └─────────────────┘
-                  │
-                  ▼
-         Both sync to cloud later
-         (conflicts already resolved)
+```mermaid
+sequenceDiagram
+    participant A as 📱 Device A (offline)
+    participant P2P as WiFi/Bluetooth
+    participant B as 📱 Device B (offline)
+    participant Cloud as ☁️ Ditto Cloud
+
+    A->>P2P: Discover nearby peer
+    B->>P2P: Discover nearby peer
+    Note over P2P: CRDT Delta Exchange
+    P2P->>A: Sync data
+    P2P->>B: Sync data
+    Note over A,B: Both devices updated
+
+    Note over A,B,Cloud: Later, when online...
+    A->>Cloud: Sync to cloud
+    B->>Cloud: Sync to cloud
+    Note over Cloud: Conflicts already resolved via CRDTs
 ```
 
 ---
@@ -853,41 +851,73 @@ Attempt 5: 8 seconds delay
 
 ### Development Environment
 
+```mermaid
+graph LR
+    subgraph dev["Development Setup"]
+        mongodb_dev["MongoDB<br/>(local or Atlas)<br/>Port 27017"]
+        portal_dev["Ditto Cloud Portal<br/>Managed Connector"]
+        python["Python<br/>Data Generator"]
+    end
+
+    python -.-> mongodb_dev
+
+    style dev fill:#fff9c4
+    style mongodb_dev fill:#c8e6c9
+    style portal_dev fill:#ce93d8
 ```
-Docker Compose
-├── MongoDB (local container)
-│   └── Port 27017
-├── Ditto Local (optional)
-│   └── Port 8080
-└── Python (data generator)
-    └── Connects to local or Atlas
-```
+
+**Note**: The Ditto MongoDB Connector is a managed service configured through the Ditto Portal at https://portal.ditto.live - no local deployment needed.
 
 ### Staging Environment
 
-```
-Cloud Resources
-├── MongoDB Atlas (M10 cluster, staging)
-├── Ditto Cloud (staging app)
-└── Test Devices (iOS/Android simulators)
+```mermaid
+graph TB
+    subgraph staging["Staging Environment"]
+        atlas_stg["MongoDB Atlas<br/>M10 cluster"]
+        ditto_stg["Ditto Cloud<br/>Staging App"]
+        devices_stg["Test Devices<br/>Flutter apps<br/>iOS/Android/Desktop"]
+    end
+
+    atlas_stg <--> ditto_stg
+    ditto_stg <--> devices_stg
+
+    style staging fill:#e1f5fe
+    style atlas_stg fill:#81d4fa
+    style ditto_stg fill:#ce93d8
+    style devices_stg fill:#a5d6a7
 ```
 
 ### Production Environment
 
-```
-Cloud Resources
-├── MongoDB Atlas (M30+ cluster, multi-region)
-│   ├── Primary Region: US-West
-│   ├── Secondary Region: US-East (failover)
-│   └── Backup: Continuous, 7-day retention
-├── Ditto Cloud (production app)
-│   ├── Global CDN
-│   ├── Multi-region sync hubs
-│   └── 99.9% uptime SLA
-└── Mobile Devices (thousands)
-    ├── POS terminals
-    ├── Sales tablets
-    └── Manager apps
+```mermaid
+graph TB
+    subgraph prod["Production Environment"]
+        subgraph atlas_prod["MongoDB Atlas M30+<br/>Multi-Region"]
+            primary["Primary Region<br/>US-West"]
+            secondary["Secondary Region<br/>US-East (failover)"]
+            backup["Backup<br/>Continuous, 7-day"]
+        end
+
+        subgraph ditto_prod["Ditto Cloud Production"]
+            cdn["Global CDN"]
+            sync_hubs["Multi-region<br/>Sync Hubs"]
+            sla["99.9% Uptime SLA"]
+        end
+
+        subgraph devices_prod["Mobile Devices (thousands)"]
+            pos["POS Terminals"]
+            tablets["Sales Tablets"]
+            manager["Manager Apps"]
+        end
+    end
+
+    atlas_prod <--> ditto_prod
+    ditto_prod <--> devices_prod
+
+    style prod fill:#fce4ec
+    style atlas_prod fill:#f48fb1
+    style ditto_prod fill:#ce93d8
+    style devices_prod fill:#a5d6a7
 ```
 
 ### Monitoring & Observability

@@ -1,6 +1,6 @@
 # Zava DIY Retail - MongoDB + Ditto Conversion
 
-This project converts the Microsoft Zava DIY Retail demo from PostgreSQL to MongoDB + Ditto, enabling offline-first mobile and edge applications with real-time bidirectional sync.
+This project is inspired by the Microsoft Zava DIY Retail demo.  It implements a retail dataset using MongoDB + Ditto, enabling offline-first mobile and edge applications with real-time bidirectional sync.
 
 ---
 
@@ -14,7 +14,6 @@ This project converts the Microsoft Zava DIY Retail demo from PostgreSQL to Mong
 - ✅ Real-time bidirectional sync with automatic conflict resolution (CRDTs)
 - ✅ Edge computing support (peer-to-peer sync)
 - ✅ Flexible schema with MongoDB
-- ✅ Vector search for AI-powered product recommendations
 - ✅ Scalable distributed architecture
 
 ---
@@ -25,14 +24,13 @@ This project converts the Microsoft Zava DIY Retail demo from PostgreSQL to Mong
 - Python 3.8+
 - MongoDB Atlas account (M10+ cluster recommended)
 - Ditto account ([portal.ditto.live](https://portal.ditto.live))
-- Docker (optional, for connector deployment)
 
 ### 1. Clone and Setup
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd ai-tour-26-zava-diy-dataset-plus-mcp
+git clone https://github.com/ditto-examples/retail-demo-zava-dyi-dataset
+cd retail-demo-zava-dyi-dataset
 
 # Create virtual environment
 python3 -m venv venv
@@ -102,15 +100,16 @@ python scripts/enable_change_streams.py
 # See CONNECTOR_SETUP.md for instructions
 ```
 
-### 6. Deploy Ditto Connector
+### 6. Configure Ditto Connector in Portal
+
+The MongoDB Connector is configured through the **Ditto Portal** (not Docker):
+
+1. Navigate to https://portal.ditto.live
+2. Go to Settings → MongoDB Connector
+3. Add your MongoDB Atlas connection string
+4. Configure collection mappings
 
 See [CONNECTOR_SETUP.md](./CONNECTOR_SETUP.md) for detailed instructions.
-
-**Quick Docker Deployment**:
-```bash
-docker-compose up -d
-docker-compose logs -f ditto-connector
-```
 
 ### 7. Trigger Initial Sync
 
@@ -227,44 +226,41 @@ ai-tour-26-zava-diy-dataset-plus-mcp/
 
 ### MongoDB + Ditto Stack
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                   Mobile/Edge Devices                    │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐        │
-│  │ iOS App    │  │ Android App│  │ Web App     │        │
-│  │ (Swift)    │  │ (Kotlin)   │  │ (JavaScript)│        │
-│  └────────────┘  └────────────┘  └────────────┘        │
-│         │               │               │                │
-│         └───────────────┼───────────────┘                │
-│                         │                                │
-│                    Ditto Sync                            │
-│              (CRDTs, P2P, Offline)                       │
-└─────────────────────────┬───────────────────────────────┘
-                          │
-                  ┌───────▼───────┐
-                  │  Ditto Cloud  │
-                  │   (Portal)    │
-                  └───────┬───────┘
-                          │
-              ┌───────────▼───────────┐
-              │ MongoDB Connector     │
-              │  (Bidirectional Sync) │
-              └───────────┬───────────┘
-                          │
-           ┌──────────────▼──────────────┐
-           │      MongoDB Atlas          │
-           │  ┌──────────────────────┐   │
-           │  │ retail-demo database │   │
-           │  │  - stores            │   │
-           │  │  - customers         │   │
-           │  │  - products          │   │
-           │  │  - inventory         │   │
-           │  │  - orders            │   │
-           │  │  - order_items       │   │
-           │  └──────────────────────┘   │
-           │                              │
-           │  Vector Search (embeddings)  │
-           └──────────────────────────────┘
+```mermaid
+graph TB
+    subgraph flutter["Flutter Applications<br/>(Cross-platform with Ditto)"]
+        ios["iOS"]
+        ipados["iPadOS"]
+        android["Android"]
+        macos["MacOS"]
+        windows["Windows"]
+        linux["Linux"]
+    end
+
+    subgraph ditto_sync["Ditto Sync Layer"]
+        sync["Ditto Sync<br/>(CRDTs, P2P, Offline-First)"]
+    end
+
+    portal["Ditto Cloud<br/>(Portal)"]
+
+    connector["MongoDB Connector<br/>(Managed in Portal)<br/>Bidirectional Sync"]
+
+    subgraph mongodb["MongoDB Atlas"]
+        db["retail-demo database<br/>━━━━━━━━━━━━━━━━<br/>• stores<br/>• customers<br/>• products<br/>• inventory<br/>• orders<br/>• order_items"]
+        vector["Vector Search<br/>(embeddings)"]
+    end
+
+    ios & ipados & android & macos & windows & linux --> sync
+    sync <--> portal
+    portal <--> connector
+    connector <--> db
+    db -.-> vector
+
+    style flutter fill:#e1f5ff
+    style ditto_sync fill:#fff4e1
+    style portal fill:#f0e1ff
+    style connector fill:#e1ffe1
+    style mongodb fill:#ffe1e1
 ```
 
 ### Data Flow
@@ -272,7 +268,7 @@ ai-tour-26-zava-diy-dataset-plus-mcp/
 1. **Mobile Device → Ditto**: App creates/updates documents (works offline)
 2. **Ditto → MongoDB**: Connector syncs changes to cloud database
 3. **MongoDB → Ditto**: Server updates propagate to all connected devices
-4. **P2P Sync**: Devices can sync directly without cloud (optional)
+4. **P2P Sync**: Devices can sync directly without cloud 
 
 ### Conflict Resolution
 
@@ -293,20 +289,20 @@ No manual conflict resolution needed!
 - Check stock levels and reorder alerts
 - Works offline, syncs when connected
 
-**Sample Code** (Swift):
-```swift
+**Sample Code** (Flutter/Dart):
+```dart
 // Subscribe to store's inventory
-ditto.sync.registerSubscription(
-  query: "store_id == '\(storeId)' && deleted == false",
+await ditto.sync.registerSubscription(
+  query: "store_id == '$storeId' && deleted == false",
   collection: "inventory"
-)
+);
 
 // Update stock level
-try await ditto.store.collection("inventory")
+await ditto.store.collection("inventory")
   .findById(inventoryId)
-  .update { doc in
-    doc?["stock_level"].set(newStock)
-  }
+  .update((doc) {
+    doc?["stock_level"].set(newStock);
+  });
 ```
 
 ### 2. Field Sales Representative
@@ -320,12 +316,6 @@ try await ditto.store.collection("inventory")
 - Update stock counts
 - Generate reorder reports
 - Offline inventory management
-
-### 4. Customer Mobile App
-- Browse products
-- Place orders
-- View order history
-- Offline shopping cart
 
 ---
 
@@ -360,69 +350,54 @@ db.product_embeddings.aggregate([
 
 ### Ditto (Mobile/Edge)
 
-```swift
-// Get order (Swift)
-let order = try await ditto
+```dart
+// Get order (Flutter/Dart)
+final order = await ditto
   .store.collection("orders")
   .find("order_id == 'order_123'")
-  .exec()
+  .exec();
 
 // Get order items
-let items = try await ditto
+final items = await ditto
   .store.collection("order_items")
   .find("order_id == 'order_123'")
-  .exec()
+  .exec();
 
 // Live query (real-time updates)
-let liveQuery = ditto
+final liveQuery = ditto
   .store.collection("inventory")
   .find("store_id == 'store_seattle'")
-  .observeLocal { docs, event in
+  .observeLocal((docs, event) {
     // Update UI automatically
-    self.updateInventoryUI(docs)
-  }
+    updateInventoryUI(docs);
+  });
 ```
 
 ---
 
-## Deployment
+## Ditto Connector Setup
 
-### Development (Docker)
+The MongoDB Connector is a **managed service** configured through the **Ditto Portal** - there is no Docker container or self-hosted deployment required.
 
-```bash
-docker-compose up -d
-docker-compose logs -f ditto-connector
-```
+### Setup Steps
 
-### Production (Kubernetes)
+1. **Configure in Ditto Portal**:
+   - Navigate to https://portal.ditto.live
+   - Go to Settings → MongoDB Connector
+   - Add your MongoDB Atlas connection string
+   - Configure collection mappings and sync settings
 
-```bash
-kubectl apply -f k8s/
-kubectl get pods -n ditto
-kubectl logs -f deployment/ditto-connector -n ditto
-```
+2. **Enable Change Streams** (Required):
+   ```bash
+   python scripts/enable_change_streams.py
+   ```
 
-See [CONNECTOR_SETUP.md](./CONNECTOR_SETUP.md) for detailed deployment instructions.
+3. **Trigger Initial Sync**:
+   ```bash
+   python scripts/trigger_initial_sync.py
+   ```
 
----
-
-## Monitoring
-
-### Health Check
-```bash
-curl http://localhost:8080/health
-```
-
-### Prometheus Metrics
-```bash
-curl http://localhost:9090/metrics
-```
-
-**Key Metrics**:
-- `ditto_sync_operations_total` - Total sync operations
-- `ditto_sync_errors_total` - Total sync errors
-- `ditto_sync_lag_seconds` - Current sync lag
-- `ditto_documents_synced_total` - Total documents synced
+See [CONNECTOR_SETUP.md](./CONNECTOR_SETUP.md) for detailed configuration instructions.
 
 ---
 
