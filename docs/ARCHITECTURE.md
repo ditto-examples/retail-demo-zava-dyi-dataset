@@ -52,6 +52,7 @@ This document describes the complete system architecture for the MongoDB + Ditto
 ## Architecture Diagram
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#2563eb','primaryTextColor':'#fff','primaryBorderColor':'#1e40af','lineColor':'#4b5563','secondaryColor':'#7c3aed','tertiaryColor':'#059669'}}}%%
 graph TB
     subgraph cloud["☁️ Cloud Layer"]
         mongodb["MongoDB Atlas<br/>━━━━━━━━━━<br/>• 9 Collections<br/>• Indexes<br/>• Vector Search"]
@@ -98,13 +99,15 @@ graph TB
     mongodb -.-> mcp
     mongodb -.-> azure
 
-    style cloud fill:#e3f2fd
-    style sync fill:#fff3e0
-    style edge fill:#f3e5f5
-    style integration fill:#e8f5e9
-    style mongodb fill:#bbdefb
-    style connector fill:#c5e1a5
-    style portal fill:#ce93d8
+    style cloud fill:#1e40af,stroke:#1e3a8a,stroke-width:3px,color:#fff
+    style sync fill:#f59e0b,stroke:#d97706,stroke-width:3px,color:#000
+    style edge fill:#7c3aed,stroke:#6d28d9,stroke-width:3px,color:#fff
+    style integration fill:#059669,stroke:#047857,stroke-width:3px,color:#fff
+    style mongodb fill:#3b82f6,stroke:#2563eb,color:#fff
+    style connector fill:#10b981,stroke:#059669,color:#fff
+    style portal fill:#a855f7,stroke:#7c3aed,color:#fff
+    style pos fill:#6d28d9,stroke:#5b21b6,color:#fff
+    style tablet fill:#6d28d9,stroke:#5b21b6,color:#fff
 ```
 
 ---
@@ -852,6 +855,7 @@ Attempt 5: 8 seconds delay
 ### Development Environment
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#2563eb','primaryTextColor':'#fff','primaryBorderColor':'#1e40af'}}}%%
 graph LR
     subgraph dev["Development Setup"]
         mongodb_dev["MongoDB<br/>(local or Atlas)<br/>Port 27017"]
@@ -861,9 +865,10 @@ graph LR
 
     python -.-> mongodb_dev
 
-    style dev fill:#fff9c4
-    style mongodb_dev fill:#c8e6c9
-    style portal_dev fill:#ce93d8
+    style dev fill:#eab308,stroke:#ca8a04,stroke-width:2px,color:#000
+    style mongodb_dev fill:#059669,stroke:#047857,color:#fff
+    style portal_dev fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style python fill:#6b7280,stroke:#4b5563,color:#fff
 ```
 
 **Note**: The Ditto MongoDB Connector is a managed service configured through the Ditto Portal at https://portal.ditto.live - no local deployment needed.
@@ -871,6 +876,7 @@ graph LR
 ### Staging Environment
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#2563eb','primaryTextColor':'#fff','primaryBorderColor':'#1e40af'}}}%%
 graph TB
     subgraph staging["Staging Environment"]
         atlas_stg["MongoDB Atlas<br/>M10 cluster"]
@@ -881,15 +887,16 @@ graph TB
     atlas_stg <--> ditto_stg
     ditto_stg <--> devices_stg
 
-    style staging fill:#e1f5fe
-    style atlas_stg fill:#81d4fa
-    style ditto_stg fill:#ce93d8
-    style devices_stg fill:#a5d6a7
+    style staging fill:#1e40af,stroke:#1e3a8a,stroke-width:3px,color:#fff
+    style atlas_stg fill:#3b82f6,stroke:#2563eb,color:#fff
+    style ditto_stg fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style devices_stg fill:#059669,stroke:#047857,color:#fff
 ```
 
 ### Production Environment
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#2563eb','primaryTextColor':'#fff','primaryBorderColor':'#1e40af'}}}%%
 graph TB
     subgraph prod["Production Environment"]
         subgraph atlas_prod["MongoDB Atlas M30+<br/>Multi-Region"]
@@ -914,10 +921,19 @@ graph TB
     atlas_prod <--> ditto_prod
     ditto_prod <--> devices_prod
 
-    style prod fill:#fce4ec
-    style atlas_prod fill:#f48fb1
-    style ditto_prod fill:#ce93d8
-    style devices_prod fill:#a5d6a7
+    style prod fill:#dc2626,stroke:#b91c1c,stroke-width:3px,color:#fff
+    style atlas_prod fill:#ef4444,stroke:#dc2626,color:#fff
+    style ditto_prod fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style devices_prod fill:#059669,stroke:#047857,color:#fff
+    style primary fill:#991b1b,stroke:#7f1d1d,color:#fff
+    style secondary fill:#991b1b,stroke:#7f1d1d,color:#fff
+    style backup fill:#991b1b,stroke:#7f1d1d,color:#fff
+    style cdn fill:#6d28d9,stroke:#5b21b6,color:#fff
+    style sync_hubs fill:#6d28d9,stroke:#5b21b6,color:#fff
+    style sla fill:#6d28d9,stroke:#5b21b6,color:#fff
+    style pos fill:#047857,stroke:#065f46,color:#fff
+    style tablets fill:#047857,stroke:#065f46,color:#fff
+    style manager fill:#047857,stroke:#065f46,color:#fff
 ```
 
 ### Monitoring & Observability

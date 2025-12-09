@@ -227,6 +227,7 @@ ai-tour-26-zava-diy-dataset-plus-mcp/
 ### MongoDB + Ditto Stack
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#4a90e2','primaryTextColor':'#fff','primaryBorderColor':'#2c5282','lineColor':'#4a90e2','secondaryColor':'#7c3aed','tertiaryColor':'#059669'}}}%%
 graph TB
     subgraph flutter["Flutter Applications<br/>(Cross-platform with Ditto)"]
         ios["iOS"]
@@ -256,11 +257,20 @@ graph TB
     connector <--> db
     db -.-> vector
 
-    style flutter fill:#e1f5ff
-    style ditto_sync fill:#fff4e1
-    style portal fill:#f0e1ff
-    style connector fill:#e1ffe1
-    style mongodb fill:#ffe1e1
+    style flutter fill:#2563eb,stroke:#1e40af,stroke-width:3px,color:#fff
+    style ditto_sync fill:#f59e0b,stroke:#d97706,stroke-width:3px,color:#000
+    style portal fill:#7c3aed,stroke:#6d28d9,stroke-width:2px,color:#fff
+    style connector fill:#059669,stroke:#047857,stroke-width:2px,color:#fff
+    style mongodb fill:#dc2626,stroke:#b91c1c,stroke-width:3px,color:#fff
+    style ios fill:#1e40af,stroke:#1e3a8a,color:#fff
+    style ipados fill:#1e40af,stroke:#1e3a8a,color:#fff
+    style android fill:#1e40af,stroke:#1e3a8a,color:#fff
+    style macos fill:#1e40af,stroke:#1e3a8a,color:#fff
+    style windows fill:#1e40af,stroke:#1e3a8a,color:#fff
+    style linux fill:#1e40af,stroke:#1e3a8a,color:#fff
+    style sync fill:#d97706,stroke:#92400e,color:#fff
+    style db fill:#991b1b,stroke:#7f1d1d,color:#fff
+    style vector fill:#991b1b,stroke:#7f1d1d,color:#fff
 ```
 
 ### Data Flow

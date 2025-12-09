@@ -620,6 +620,7 @@ This document provides a complete specification of the data model for the Zava D
 ### Entity Relationship Diagram
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#2563eb','primaryTextColor':'#fff','primaryBorderColor':'#1e40af','lineColor':'#6b7280','tertiaryColor':'#f3f4f6','tertiaryTextColor':'#000','tertiaryBorderColor':'#9ca3af'}}}%%
 erDiagram
     STORES ||--o{ CUSTOMERS : "primary_store"
     STORES ||--o{ ORDERS : "store"
